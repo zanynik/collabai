@@ -4,7 +4,7 @@ Welcome to our living community summary! This page captures the shared experienc
 
 ## Highlights
 
-No feedback collected yet. Be the first to share your experience!
+- Nikhil enjoyed the food and location at the event.
 
 ## Learnings & Takeaways
 
