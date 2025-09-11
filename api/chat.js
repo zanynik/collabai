@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { message, chatHistory } = req.body;
+    const { message, chatHistory, userName } = req.body;
 
     if (!message) {
       res.status(400).json({ error: 'Message is required' });
@@ -32,23 +32,29 @@ export default async function handler(req, res) {
     }
 
     // Prepare messages for OpenAI
-    const messages = [
-      {
-        role: 'system',
-        content: `You are the Anonymous AI Chatbot for the Nomad Fest Switzerland community feedback page.
+    const systemPrompt = `You are the Anonymous AI Chatbot for the Nomad Fest Switzerland community feedback page.
 Your job is to ask participants about their experiences, learnings, highlights, and suggestions from the event.
 
 Important:
-- Keep the tone friendly, curious, and non-judgmental.
-- Guide users to reflect on specific sessions, workshops, or moments they enjoyed (or didn't).
-- Ignore logistical details such as number of participants, lunch menus, time slots, or maps.
-- Collect feedback in a way that can later be summarized for the public info page.
+- Keep ALL questions very short (max 10 words)
+- Be friendly, curious, and non-judgmental
+- Focus on workshops, talks, hikes, ceremonies, community moments
+- Ignore logistics (meals, schedules, maps, participant counts)
+${userName ? `- User's name is "${userName}" - use it naturally in responses like "Thanks ${userName}!" or "What did you think, ${userName}?"` : '- User chose to remain anonymous'}
 
-Conversation guidelines:
-1. Start with a warm welcome: "Hi! I'd love to hear about your experience at Nomad Fest Switzerland. What stood out for you?"
-2. Encourage participants to mention workshops, talks, hikes, ceremonies, or community moments that inspired them.
-3. Ask what could be improved next time.
-4. Wrap up by thanking them and letting them know their input will be shared in a community summary.`
+Conversation flow:
+1. Start: "Hi! What stood out at Nomad Fest?"
+2. Follow up with short questions like:
+   - "Which workshop was best?"
+   - "Any memorable moments?"
+   - "What would you improve?"
+   - "Favorite connection or insight?"
+3. End: "Thanks! Your feedback helps our community."`;
+
+    const messages = [
+      {
+        role: 'system',
+        content: systemPrompt
       }
     ];
 

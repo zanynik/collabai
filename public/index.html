@@ -95,6 +95,25 @@
         .nav a:hover {
             text-decoration: underline;
         }
+        .name-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+        }
+        #nameInput {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: #f9f9f9;
+        }
+        #nameInput:focus {
+            outline: none;
+            border-color: #28a745;
+            background-color: white;
+        }
     </style>
 </head>
 <body>
@@ -108,7 +127,7 @@
     <div class="chat-container">
         <div class="chat-log" id="chatLog">
             <div class="message bot-message">
-                Hi! I'd love to hear about your experience at Nomad Fest Switzerland. What stood out for you?
+                Hi! What stood out at Nomad Fest?
             </div>
         </div>
         
@@ -117,7 +136,10 @@
             <button onclick="sendMessage()">Send</button>
         </div>
         
-        <button class="submit-summary-btn" onclick="submitToSummary()">Submit Chat to Summary</button>
+        <div class="name-container">
+            <input type="text" id="nameInput" placeholder="Your name (optional)" maxlength="30">
+            <button class="submit-summary-btn" onclick="submitToSummary()">Submit Chat to Summary</button>
+        </div>
     </div>
 
     <script>
@@ -155,6 +177,8 @@
         }
 
         async function callChatAPI(userMessage) {
+            const userName = document.getElementById('nameInput').value.trim() || null;
+            
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {
@@ -162,7 +186,8 @@
                 },
                 body: JSON.stringify({
                     message: userMessage,
-                    chatHistory: chatHistory.slice(-10) // Send last 10 messages for context
+                    chatHistory: chatHistory.slice(-10), // Send last 10 messages for context
+                    userName: userName
                 })
             });
 
@@ -204,7 +229,8 @@
                 
                 alert('Chat successfully submitted to summary!');
                 chatHistory = []; // Clear chat history after successful submission
-                document.getElementById('chatLog').innerHTML = '<div class="message bot-message">Hi! I\'d love to hear about your experience at Nomad Fest Switzerland. What stood out for you?</div>';
+                document.getElementById('chatLog').innerHTML = '<div class="message bot-message">Hi! What stood out at Nomad Fest?</div>';
+                document.getElementById('nameInput').value = ''; // Clear name input
                 
             } catch (error) {
                 console.error('Error submitting summary:', error);
@@ -216,6 +242,8 @@
         }
 
         async function generateAISummary() {
+            const userName = document.getElementById('nameInput').value.trim() || null;
+            
             const response = await fetch('/api/summarize', {
                 method: 'POST',
                 headers: {
@@ -223,6 +251,7 @@
                 },
                 body: JSON.stringify({
                     chatHistory: chatHistory,
+                    userName: userName,
                     type: 'summarize_chat'
                 })
             });
