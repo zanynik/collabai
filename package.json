@@ -1,0 +1,24 @@
+{
+  "name": "my-ai-site",
+  "version": "1.0.0",
+  "description": "A minimal 2-page AI chat site with GitHub integration",
+  "main": "updateSummary.js",
+  "scripts": {
+    "update": "node updateSummary.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ai",
+    "chat",
+    "github",
+    "automation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/rest": "^20.0.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

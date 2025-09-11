@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous AI Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .chat-log {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
+            border-radius: 5px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            text-align: right;
+        }
+        .bot-message {
+            background-color: #e9ecef;
+            color: #333;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        textarea {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            min-height: 60px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .submit-summary-btn {
+            background-color: #28a745;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .submit-summary-btn:hover {
+            background-color: #1e7e34;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .nav {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav a {
+            margin: 0 15px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Anonymous AI Chat</h1>
+    
+    <div class="nav">
+        <a href="index.html">Chat</a>
+        <a href="info.md">Community Summary</a>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-log" id="chatLog">
+            <div class="message bot-message">
+                Hello! I'm your AI assistant. How can I help you today?
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <textarea id="messageInput" placeholder="Type your message here..."></textarea>
+            <button onclick="sendMessage()">Send</button>
+        </div>
+        
+        <button class="submit-summary-btn" onclick="submitToSummary()">Submit Chat to Summary</button>
+    </div>
+
+    <script>
+        let chatHistory = [];
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message to chat
+            addMessageToChat('user', message);
+            chatHistory.push({type: 'user', message: message, timestamp: new Date()});
+            
+            // Clear input
+            input.value = '';
+            
+            // Mock bot response (replace with real AI API call later)
+            setTimeout(() => {
+                const botResponse = generateMockResponse(message);
+                addMessageToChat('bot', botResponse);
+                chatHistory.push({type: 'bot', message: botResponse, timestamp: new Date()});
+            }, 1000);
+        }
+
+        function addMessageToChat(type, message) {
+            const chatLog = document.getElementById('chatLog');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            messageDiv.textContent = message;
+            chatLog.appendChild(messageDiv);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        function generateMockResponse(userMessage) {
+            const responses = [
+                "That's an interesting question! Let me think about that...",
+                "I understand your point. Here's what I think...",
+                "Thanks for sharing that with me. My perspective is...",
+                "That's a great topic to discuss. From my understanding...",
+                "I appreciate you bringing this up. Let me provide some insights..."
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function submitToSummary() {
+            if (chatHistory.length === 0) {
+                alert('No chat history to submit!');
+                return;
+            }
+
+            // Mock call to updateSummary (replace with real implementation later)
+            const summary = generateChatSummary();
+            console.log('Submitting to summary:', summary);
+            
+            // Mock API call - replace with actual call to updateSummary.js
+            alert('Chat submitted to summary! (This is a mock - implementation pending)');
+        }
+
+        function generateChatSummary() {
+            const timestamp = new Date().toISOString();
+            let summary = `## Chat Summary (${timestamp})\n\n`;
+            
+            chatHistory.forEach((entry, index) => {
+                summary += `**${entry.type.toUpperCase()}**: ${entry.message}\n\n`;
+            });
+            
+            return summary;
+        }
+
+        // Allow Enter key to send message
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
