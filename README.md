@@ -12,18 +12,33 @@ npm install
 
 ### 2. Environment Configuration
 
-Set your GitHub token as an environment variable:
+#### For Local Development:
+Set environment variables:
 
 ```bash
 export GITHUB_TOKEN="your_github_token_here"
-export REPO_OWNER="your-github-username"
+export REPO_OWNER="your-github-username" 
 export REPO_NAME="your-repository-name"
+export OPENAI_API_KEY="your_openai_api_key_here"
 ```
+
+#### For Vercel Deployment:
+Set these environment variables in your Vercel dashboard:
+
+- `GITHUB_TOKEN`: Your GitHub personal access token
+- `REPO_OWNER`: Your GitHub username (e.g., "zanynik")
+- `REPO_NAME`: Your repository name (e.g., "collabai")  
+- `OPENAI_API_KEY`: Your OpenAI API key
 
 **To get a GitHub token:**
 1. Go to GitHub Settings > Developer settings > Personal access tokens
 2. Generate a new token with `repo` permissions
 3. Copy and use the token in the environment variable above
+
+**To get an OpenAI API key:**
+1. Go to https://platform.openai.com/api-keys
+2. Create a new secret key
+3. Copy and use the key in the environment variable above
 
 ### 3. Usage
 
@@ -50,26 +65,38 @@ node updateSummary.js
 
 ```
 my-ai-site/
+├── api/
+│   └── update-summary.js  # Vercel serverless function for GitHub updates
 ├── public/
-│   ├── index.html      # Chat interface with mock AI responses
+│   ├── index.html      # Chat interface with real OpenAI integration
 │   └── info.md         # Community summary page (auto-updated)
-├── updateSummary.js    # GitHub integration script
-├── package.json        # Dependencies and scripts
+├── updateSummary.js    # GitHub integration script (for local use)
+├── package.json        # Dependencies: @octokit/rest, openai
 ├── vercel.json         # Vercel deployment configuration
 └── README.md          # This file
 ```
 
 ## How It Works
 
-1. **Chat Interface**: `public/index.html` provides a simple chat UI with mock responses
-2. **Summary Updates**: `updateSummary.js` uses GitHub API to update `public/info.md`
-3. **Auto-Deploy**: Changes pushed to GitHub trigger automatic redeployment (configured in your hosting platform like Vercel)
+1. **Real AI Chat**: `public/index.html` uses OpenAI API for real chat conversations
+2. **Smart Summarization**: Chat conversations are summarized using OpenAI and combined with existing summaries
+3. **GitHub Integration**: `api/update-summary.js` serverless function updates `public/info.md` on GitHub
+4. **Auto-Deploy**: Changes pushed to GitHub trigger automatic Vercel redeployment
+
+## Features
+
+- ✅ Real OpenAI chat integration
+- ✅ Intelligent chat summarization
+- ✅ Incremental summary updates (doesn't overwrite, but combines intelligently)
+- ✅ Automatic GitHub commits and deployment
+- ✅ Serverless architecture (no database needed)
+- ✅ CORS-enabled API endpoints
 
 ## Next Steps
 
-- Replace mock AI responses with real API calls
-- Integrate the `updateSummary.js` function with the chat interface
-- Deploy to Vercel or similar platform for automatic updates
+- Set up environment variables in Vercel dashboard
+- Test the full flow: chat → summarize → GitHub update → redeploy
+- Consider adding authentication for production use
 
 ## Requirements
 
