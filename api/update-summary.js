@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
     const REPO_OWNER = process.env.REPO_OWNER || 'zanynik';
     const REPO_NAME = process.env.REPO_NAME || 'collabai';
-    const FILE_PATH = 'public/info.html';
+    const FILE_PATH = 'public/info.md';
     const COMMIT_MESSAGE = 'update summary';
 
     // Initialize Octokit with GitHub token

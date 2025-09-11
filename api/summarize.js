@@ -80,33 +80,18 @@ Instructions:
 - Maintain a narrative style: not just a list of events, but what people actually experienced and learned.
 - Always output the full updated Markdown document, not just incremental changes.
 
-Required Format - Generate ONLY the content inside the <div id="content"> tags:
-<h1>Community Summary – Nomad Fest Switzerland 2025</h1>
+Required Format:
+# Community Summary – Nomad Fest Switzerland 2025
+[short welcoming sentence]
 
-<p>[short welcoming sentence]</p>
+## Highlights
+[bullet points or short paragraphs summarizing positive experiences]
 
-<h2>🌟 Highlights</h2>
-<div class="section-content">
-[bullet points or paragraphs with positive experiences - use <ul><li> for lists]
-</div>
+## Learnings & Takeaways
+[what participants said they learned]
 
-<h2>💡 Learnings & Takeaways</h2>
-<div class="section-content">
-[what participants said they learned - use <ul><li> for lists]
-</div>
-
-<h2>💭 Suggestions</h2>
-<div class="section-content">
-[constructive feedback or ideas for future editions - use <ul><li> for lists]
-</div>
-
-<hr>
-
-<div class="footer">
-<em>This page is automatically updated when participants submit their feedback through our anonymous chat.</em>
-</div>
-
-IMPORTANT: Only output the HTML content that goes inside the content div, not the full HTML page structure.`
+## Suggestions
+[constructive feedback or ideas for future editions]`
         },
         {
           role: 'user',
