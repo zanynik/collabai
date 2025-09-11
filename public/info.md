@@ -4,7 +4,10 @@ This page will contain summaries of past chats.
 
 ## Latest Updates
 
-No summaries available yet. Submit your first chat to get started!
+- User questions if the bot is real
+- Bot responds that it is a computer program designed to assist
+- User acknowledges and expresses satisfaction with the assistance provided
+- Bot offers help for any questions or assistance needed
 
 ---
 
