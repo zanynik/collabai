@@ -101,8 +101,8 @@
     <h1>Nomad Fest Switzerland - Community Feedback</h1>
     
     <div class="nav">
-        <a href="index.html">Chat</a>
-        <a href="info.md">Community Summary</a>
+        <a href="index.html">💬 Share Feedback</a>
+        <a href="info.html">📋 Community Summary</a>
     </div>
 
     <div class="chat-container">
@@ -246,13 +246,13 @@
             console.log('Updated summary content:', updatedContent);
             
             // Call our Vercel API function to update GitHub
-            const response = await fetch('/api/update-summary', {
+            const response = await fetch('/api/update-html-summary', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    updatedContent: updatedContent
+                    newContentHtml: updatedContent
                 })
             });
 
@@ -268,14 +268,42 @@
 
         async function getCurrentSummary() {
             try {
-                const response = await fetch('/info.md');
+                const response = await fetch('/info.html');
                 if (response.ok) {
-                    return await response.text();
+                    const htmlContent = await response.text();
+                    // Extract just the content inside the content div
+                    const contentMatch = htmlContent.match(/<div id="content">([\s\S]*?)<\/div>/);
+                    if (contentMatch) {
+                        return contentMatch[1].trim();
+                    }
                 }
             } catch (error) {
                 console.log('Could not fetch current summary, starting fresh');
             }
-            return '# Community Summary\n\nThis page contains summaries of past chats.\n\n';
+            return `<h1>Community Summary – Nomad Fest Switzerland 2025</h1>
+            
+            <p>Welcome to our living community summary! This page captures the shared experiences, insights, and suggestions from Nomad Fest participants.</p>
+            
+            <h2>🌟 Highlights</h2>
+            <div class="empty-state">
+                <p>No feedback collected yet. Be the first to share your experience!</p>
+            </div>
+            
+            <h2>💡 Learnings & Takeaways</h2>
+            <div class="empty-state">
+                <p>Participant insights and personal growth moments will appear here as feedback is submitted.</p>
+            </div>
+            
+            <h2>💭 Suggestions</h2>
+            <div class="empty-state">
+                <p>Ideas and constructive feedback for future editions will be compiled here.</p>
+            </div>
+            
+            <hr>
+            
+            <div class="footer">
+                <em>This page is automatically updated when participants submit their feedback through our anonymous chat.</em>
+            </div>`;
         }
 
         async function generateIncrementalSummary(currentContent, newSummary) {

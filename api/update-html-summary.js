@@ -21,10 +21,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { updatedContent } = req.body;
+    const { newContentHtml } = req.body;
 
-    if (!updatedContent) {
-      res.status(400).json({ error: 'Updated content is required' });
+    if (!newContentHtml) {
+      res.status(400).json({ error: 'New content HTML is required' });
       return;
     }
 
@@ -44,9 +44,10 @@ export default async function handler(req, res) {
       auth: process.env.GITHUB_TOKEN,
     });
 
-    console.log('Starting summary update process...');
+    console.log('Starting HTML summary update process...');
     
-    // Get current file SHA for update
+    // Get current file content
+    let currentFileContent;
     let currentSha;
     try {
       const { data: currentFile } = await octokit.rest.repos.getContent({
@@ -55,35 +56,40 @@ export default async function handler(req, res) {
         path: FILE_PATH,
       });
       currentSha = currentFile.sha;
+      currentFileContent = Buffer.from(currentFile.content, 'base64').toString();
       console.log('Found existing file, SHA:', currentSha);
     } catch (error) {
       if (error.status === 404) {
-        console.log('File does not exist, creating new file');
-        currentSha = null;
+        res.status(404).json({ error: 'HTML file not found' });
+        return;
       } else {
         throw error;
       }
     }
     
-    // Encode content to base64
-    const contentEncoded = Buffer.from(updatedContent).toString('base64');
+    // Replace the content inside the content div
+    const contentRegex = /<div id="content">([\s\S]*?)<\/div>/;
+    const updatedFileContent = currentFileContent.replace(
+      contentRegex,
+      `<div id="content">\n            ${newContentHtml}\n        </div>`
+    );
     
-    // Update or create the file
+    // Encode content to base64
+    const contentEncoded = Buffer.from(updatedFileContent).toString('base64');
+    
+    // Update the file
     const updateParams = {
       owner: REPO_OWNER,
       repo: REPO_NAME,
       path: FILE_PATH,
       message: COMMIT_MESSAGE,
       content: contentEncoded,
+      sha: currentSha,
     };
-    
-    if (currentSha) {
-      updateParams.sha = currentSha;
-    }
     
     const { data: result } = await octokit.rest.repos.createOrUpdateFileContents(updateParams);
     
-    console.log('Successfully updated summary!');
+    console.log('Successfully updated HTML summary!');
     console.log('Commit SHA:', result.commit.sha);
     console.log('Commit URL:', result.commit.html_url);
     
@@ -94,9 +100,9 @@ export default async function handler(req, res) {
     });
     
   } catch (error) {
-    console.error('Error updating summary:', error.message);
+    console.error('Error updating HTML summary:', error.message);
     res.status(500).json({ 
-      error: 'Failed to update summary',
+      error: 'Failed to update HTML summary',
       details: error.message 
     });
   }
