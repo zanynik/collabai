@@ -1,14 +1,19 @@
-# Community Summary
+# Community Summary – Nomad Fest Switzerland 2025
 
-This page will contain summaries of past chats.
+Welcome to our living community summary! This page captures the shared experiences, insights, and suggestions from Nomad Fest participants.
 
-## Latest Updates
+## Highlights
 
-- User questions if the bot is real
-- Bot responds that it is a computer program designed to assist
-- User acknowledges and expresses satisfaction with the assistance provided
-- Bot offers help for any questions or assistance needed
+No feedback collected yet. Be the first to share your experience!
+
+## Learnings & Takeaways
+
+Participant insights and personal growth moments will appear here as feedback is submitted.
+
+## Suggestions
+
+Ideas and constructive feedback for future editions will be compiled here.
 
 ---
 
-*This page is automatically updated when chat summaries are submitted.*
+*This page is automatically updated when participants submit their feedback through our anonymous chat.*

@@ -42,11 +42,19 @@ export default async function handler(req, res) {
       messages = [
         {
           role: 'system',
-          content: 'You will receive a chat conversation and should create a concise summary. Focus on key topics, insights, and main points discussed. Format as markdown with bullet points.'
+          content: `You are the summarizer for Nomad Fest Switzerland community feedback.
+Your job is to create concise summaries from participant feedback conversations.
+
+Instructions:
+- Focus on what participants found meaningful: workshops, talks, hikes, ceremonies, community dinners, networking, insights, personal growth.
+- Discard trivial or logistical info (number of participants, meal times, bus schedules, maps).
+- Extract key experiences, learnings, and constructive suggestions.
+- Format as clear, community-oriented markdown with bullet points.
+- Keep it concise but capture the essence of what made the experience meaningful.`
         },
         {
           role: 'user',
-          content: `Please summarize this conversation:\n\n${chatText}`
+          content: `Please summarize this participant feedback conversation:\n\n${chatText}`
         }
       ];
 
@@ -60,11 +68,34 @@ export default async function handler(req, res) {
       messages = [
         {
           role: 'system',
-          content: 'You will receive existing summary content and a new chat summary. Combine them intelligently, avoiding duplication while preserving important information. Keep the format consistent and organized.'
+          content: `You are the summarizer for Nomad Fest Switzerland.
+Your job is to maintain a living community summary in Markdown format (info.md). 
+You receive new chat transcripts from the feedback chatbot and must update the summary incrementally.
+
+Instructions:
+- Keep the summary clear, concise, and community-oriented.
+- Focus on what participants found meaningful: workshops, talks, hikes, ceremonies, community dinners, networking, insights, personal growth.
+- Discard trivial or logistical info (number of participants, meal times, bus schedules, maps).
+- Group similar feedback together under short headings (e.g. "Workshops & Talks", "Community & Networking", "Suggestions for Next Year").
+- Maintain a narrative style: not just a list of events, but what people actually experienced and learned.
+- Always output the full updated Markdown document, not just incremental changes.
+
+Required Format:
+# Community Summary – Nomad Fest Switzerland 2025
+[short welcoming sentence]
+
+## Highlights
+[bullet points or short paragraphs summarizing positive experiences]
+
+## Learnings & Takeaways
+[what participants said they learned]
+
+## Suggestions
+[constructive feedback or ideas for future editions]`
         },
         {
           role: 'user',
-          content: `Current summary:\n${currentContent}\n\nNew chat to add:\n${req.body.newSummary}\n\nPlease create an updated summary that incorporates both.`
+          content: `Current summary:\n${currentContent}\n\nNew feedback to incorporate:\n${req.body.newSummary}\n\nPlease create an updated community summary that incorporates the new feedback while maintaining the required format.`
         }
       ];
 
