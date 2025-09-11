@@ -5,6 +5,7 @@ Welcome to our living community summary! This page captures the shared experienc
 ## Highlights
 
 - Nikhil enjoyed the food and location at the event.
+- A participant found the NLP workshop enjoyable and insightful.
 
 ## Learnings & Takeaways
 
