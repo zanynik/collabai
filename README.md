@@ -50,18 +50,19 @@ node updateSummary.js
 
 ```
 my-ai-site/
-├── pages/
+├── public/
 │   ├── index.html      # Chat interface with mock AI responses
 │   └── info.md         # Community summary page (auto-updated)
 ├── updateSummary.js    # GitHub integration script
 ├── package.json        # Dependencies and scripts
+├── vercel.json         # Vercel deployment configuration
 └── README.md          # This file
 ```
 
 ## How It Works
 
-1. **Chat Interface**: `pages/index.html` provides a simple chat UI with mock responses
-2. **Summary Updates**: `updateSummary.js` uses GitHub API to update `pages/info.md`
+1. **Chat Interface**: `public/index.html` provides a simple chat UI with mock responses
+2. **Summary Updates**: `updateSummary.js` uses GitHub API to update `public/info.md`
 3. **Auto-Deploy**: Changes pushed to GitHub trigger automatic redeployment (configured in your hosting platform like Vercel)
 
 ## Next Steps

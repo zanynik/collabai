@@ -1,0 +1,31 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/chat",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/info",
+      "destination": "/info.md"
+    },
+    {
+      "source": "/summary",
+      "destination": "/info.md"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/info.md",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    }
+  ]
+}

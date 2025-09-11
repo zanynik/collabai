@@ -10,7 +10,7 @@ const octokit = new Octokit({
 // Configuration - update these with your repo details
 const REPO_OWNER = process.env.REPO_OWNER || 'your-username';
 const REPO_NAME = process.env.REPO_NAME || 'your-repo-name';
-const FILE_PATH = 'pages/info.md';
+const FILE_PATH = 'public/info.md';
 const COMMIT_MESSAGE = 'update summary';
 
 /**
