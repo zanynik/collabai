@@ -6,6 +6,7 @@ Welcome to our living community summary! This page captures the shared experienc
 
 - Nikhil enjoyed the food and location at the event.
 - A participant found the NLP workshop enjoyable and insightful.
+- The stress management workshop was a highlight for one participant.
 
 ## Learnings & Takeaways
 
