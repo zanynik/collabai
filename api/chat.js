@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { message, chatHistory, userName } = req.body;
+    const { message, chatHistory } = req.body;
 
     if (!message) {
       res.status(400).json({ error: 'Message is required' });
@@ -41,7 +41,7 @@ Important:
 - Ask follow-up questions based on what they share
 - Focus on workshops, talks, hikes, ceremonies, community moments
 - Ignore logistics (meals, schedules, maps, participant counts)
-${userName ? `- User's name is "${userName}" - use it naturally in responses` : '- User chose to remain anonymous'}
+- User chose to remain anonymous
 
 Conversation style:
 - Respond to what they say, then ask a relevant follow-up

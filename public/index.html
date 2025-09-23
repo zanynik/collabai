@@ -3,30 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nomad Fest Switzerland - Community Feedback</title>
+    <title>World Economy Ideas - Crowdsourcing Platform</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
         }
-        .chat-container {
+        .main-container {
+            display: flex;
+            height: 100vh;
+            flex-direction: row;
+        }
+        .main-container.summary-left {
+            flex-direction: row;
+        }
+        .main-container.summary-right {
+            flex-direction: row-reverse;
+        }
+        .chat-panel {
+            flex: 1;
             background: white;
-            border-radius: 10px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            min-width: 400px;
+        }
+        .summary-panel {
+            flex: 1;
+            background: #fafafa;
+            border-left: 1px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+            min-width: 400px;
+            display: none;
+        }
+        .summary-panel.visible {
+            display: block;
+        }
+        .main-container.summary-right .summary-panel {
+            border-left: none;
+            border-right: 1px solid #ddd;
         }
         .chat-log {
-            height: 400px;
+            flex: 1;
             overflow-y: auto;
             border: 1px solid #ddd;
             padding: 15px;
             margin-bottom: 15px;
             background-color: #fafafa;
             border-radius: 5px;
+            min-height: 300px;
         }
         .message {
             margin-bottom: 10px;
@@ -83,68 +113,103 @@
             text-align: center;
             color: #333;
         }
-        .nav {
-            text-align: center;
-            margin-bottom: 20px;
+        .header {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .nav a {
-            margin: 0 15px;
-            color: #007bff;
-            text-decoration: none;
-        }
-        .nav a:hover {
-            text-decoration: underline;
-        }
-        .name-container {
+        .nav-controls {
             display: flex;
             gap: 10px;
-            align-items: center;
-            margin-top: 15px;
         }
-        #nameInput {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
+        .toggle-btn {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
             border-radius: 5px;
+            cursor: pointer;
             font-size: 14px;
-            background-color: #f9f9f9;
         }
-        #nameInput:focus {
-            outline: none;
-            border-color: #28a745;
-            background-color: white;
+        .toggle-btn:hover {
+            background-color: #0056b3;
+        }
+        .toggle-btn.active {
+            background-color: #28a745;
+        }
+        .summary-content {
+            line-height: 1.6;
+        }
+        .summary-content h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .summary-content h2 {
+            color: #555;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .summary-content ul {
+            padding-left: 20px;
+        }
+        .summary-loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .summary-panel {
+                border-left: none;
+                border-top: 1px solid #ddd;
+                min-width: auto;
+                max-height: 50vh;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Nomad Fest Switzerland - Community Feedback</h1>
-    
-    <div class="nav">
-        <a href="index.html">Chat</a>
-        <a href="info.md">Community Summary</a>
+    <div class="header">
+        <h1>Crowdsourcing Great Ideas for World Economy</h1>
+        <div class="nav-controls">
+            <button class="toggle-btn" id="summaryToggle" onclick="toggleSummaryPanel()">Show Research</button>
+            <button class="toggle-btn" id="positionToggle" onclick="toggleSummaryPosition()">Move Right</button>
+        </div>
     </div>
 
-    <div class="chat-container">
-        <div class="chat-log" id="chatLog">
-            <div class="message bot-message">
-                Hi! What stood out at Nomad Fest?
+    <div class="main-container" id="mainContainer">
+        <div class="chat-panel">
+            <div class="chat-log" id="chatLog">
+                <div class="message bot-message">
+                    Hi! Share your breakthrough economic idea. I'll evaluate if it's truly novel or a unique practical combination of existing concepts.
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <textarea id="messageInput" placeholder="Describe your economic idea here..."></textarea>
+                <button onclick="sendMessage()">Send</button>
             </div>
         </div>
         
-        <div class="input-container">
-            <textarea id="messageInput" placeholder="Type your message here..."></textarea>
-            <button onclick="sendMessage()">Send</button>
-        </div>
-        
-        <div class="name-container">
-            <input type="text" id="nameInput" placeholder="Your name (optional)" maxlength="30">
-            <button class="submit-summary-btn" onclick="submitToSummary()">Submit Chat to Summary</button>
+        <div class="summary-panel" id="summaryPanel">
+            <div class="summary-content" id="summaryContent">
+                <div class="summary-loading">Loading economic research repository...</div>
+            </div>
         </div>
     </div>
 
     <script>
         let chatHistory = [];
         let isLoading = false;
+        let summaryVisible = false;
+        let summaryPosition = 'right'; // 'left' or 'right'
+        let lastUpdateTime = 0;
+        let conversationCount = 0;
 
         async function sendMessage() {
             const input = document.getElementById('messageInput');
@@ -156,6 +221,7 @@
             // Add user message to chat
             addMessageToChat('user', message);
             chatHistory.push({type: 'user', message: message, timestamp: new Date()});
+            conversationCount++;
             
             // Clear input and disable button
             input.value = '';
@@ -167,6 +233,10 @@
                 const botResponse = await callChatAPI(message);
                 addMessageToChat('bot', botResponse);
                 chatHistory.push({type: 'bot', message: botResponse, timestamp: new Date()});
+                conversationCount++;
+                
+                // Check if we should analyze and potentially update summary
+                await checkForSummaryUpdate();
             } catch (error) {
                 console.error('Error calling chat API:', error);
                 addMessageToChat('bot', 'Sorry, I encountered an error. Please try again.');
@@ -177,7 +247,6 @@
         }
 
         async function callChatAPI(userMessage) {
-            const userName = document.getElementById('nameInput').value.trim() || null;
             
             const response = await fetch('/api/chat', {
                 method: 'POST',
@@ -186,8 +255,7 @@
                 },
                 body: JSON.stringify({
                     message: userMessage,
-                    chatHistory: chatHistory.slice(-10), // Send last 10 messages for context
-                    userName: userName
+                    chatHistory: chatHistory.slice(-10) // Send last 10 messages for context
                 })
             });
 
@@ -209,136 +277,207 @@
             chatLog.scrollTop = chatLog.scrollHeight;
         }
 
-        async function submitToSummary() {
-            const submitButton = document.querySelector('.submit-summary-btn');
-            
-            if (chatHistory.length === 0) {
-                alert('No chat history to submit!');
+        async function checkForSummaryUpdate() {
+            // Only check every 3-5 message exchanges (6-10 total messages)
+            if (conversationCount < 6 || conversationCount % 6 !== 0) {
                 return;
             }
 
-            submitButton.disabled = true;
-            submitButton.textContent = 'Submitting...';
-
             try {
-                // Generate summary using OpenAI
-                const summary = await generateAISummary();
+                // Get conversation summary
+                const conversationSummary = await getConversationSummary();
                 
-                // Call the summary update function
-                await updateSummaryOnGitHub(summary);
+                if (!conversationSummary || conversationSummary.value_level === 'none' || conversationSummary.value_level === 'low') {
+                    return;
+                }
+
+                // Check if we should update
+                const decision = await getEditingDecision(conversationSummary);
                 
-                alert('Chat successfully submitted to summary!');
-                chatHistory = []; // Clear chat history after successful submission
-                document.getElementById('chatLog').innerHTML = '<div class="message bot-message">Hi! What stood out at Nomad Fest?</div>';
-                document.getElementById('nameInput').value = ''; // Clear name input
-                
+                if (decision.shouldUpdate) {
+                    await updateSummaryContent(conversationSummary);
+                    await loadSummaryContent(); // Refresh display
+                }
             } catch (error) {
-                console.error('Error submitting summary:', error);
-                alert('Error submitting summary. Please try again.');
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Submit Chat to Summary';
+                console.error('Error in automated summary update:', error);
             }
         }
 
-        async function generateAISummary() {
-            const userName = document.getElementById('nameInput').value.trim() || null;
+        async function getConversationSummary() {
+            const response = await fetch('/api/conversation-summary', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chatHistory: chatHistory
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Conversation summary API error: ${errorData.error || response.statusText}`);
+            }
+
+            const data = await response.json();
+            return data;
+        }
+
+        async function getEditingDecision(conversationSummary) {
+            const response = await fetch('/api/editing-decision', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    conversationSummary: conversationSummary,
+                    lastUpdateTime: lastUpdateTime
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Editing decision API error: ${errorData.error || response.statusText}`);
+            }
+
+            const data = await response.json();
+            return data;
+        }
+
+        async function updateSummaryContent(conversationSummary) {
+            // Get current summary content
+            const currentContent = await loadSummaryContent(false);
             
+            // Call content integration API
             const response = await fetch('/api/summarize', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    chatHistory: chatHistory,
-                    userName: userName,
-                    type: 'summarize_chat'
+                    conversationSummary: conversationSummary,
+                    currentContent: currentContent,
+                    type: 'integrate_content'
                 })
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(`Summarize API error: ${errorData.error || response.statusText}`);
+                throw new Error(`Content integration API error: ${errorData.error || response.statusText}`);
             }
 
             const data = await response.json();
-            return data.result;
-        }
-
-        async function updateSummaryOnGitHub(newChatSummary) {
-            // First, get the current info.md content
-            const currentContent = await getCurrentSummary();
             
-            // Generate an updated summary that combines old and new
-            const updatedContent = await generateIncrementalSummary(currentContent, newChatSummary);
-            
-            console.log('Updated summary content:', updatedContent);
-            
-            // Call our Vercel API function to update GitHub
-            const response = await fetch('/api/update-summary', {
+            // Update GitHub with new content
+            const updateResponse = await fetch('/api/update-summary', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    updatedContent: updatedContent
+                    updatedContent: data.result
                 })
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`GitHub update failed: ${errorData.error || response.statusText}`);
+            if (!updateResponse.ok) {
+                const errorData = await updateResponse.json();
+                throw new Error(`GitHub update failed: ${errorData.error || updateResponse.statusText}`);
             }
 
-            const result = await response.json();
-            console.log('GitHub update successful:', result);
-            return result;
+            lastUpdateTime = Date.now();
+            return data.result;
         }
 
-        async function getCurrentSummary() {
+        async function loadSummaryContent(displayContent = true) {
             try {
                 const response = await fetch('/info.md');
                 if (response.ok) {
-                    return await response.text();
+                    const content = await response.text();
+                    if (displayContent) {
+                        const summaryContent = document.getElementById('summaryContent');
+                        // Convert markdown to HTML (basic conversion)
+                        const htmlContent = markdownToHtml(content);
+                        summaryContent.innerHTML = htmlContent;
+                    }
+                    return content;
                 }
             } catch (error) {
-                console.log('Could not fetch current summary, starting fresh');
+                console.log('Could not fetch current summary');
+                if (displayContent) {
+                    const summaryContent = document.getElementById('summaryContent');
+                    summaryContent.innerHTML = '<div class="summary-loading">Could not load research repository</div>';
+                }
             }
-            return '# Community Summary – Nomad Fest Switzerland 2025\n\nWelcome to our living community summary! This page captures the shared experiences, insights, and suggestions from Nomad Fest participants.\n\n## Highlights\n\nNo feedback collected yet. Be the first to share your experience!\n\n## Learnings & Takeaways\n\nParticipant insights and personal growth moments will appear here as feedback is submitted.\n\n## Suggestions\n\nIdeas and constructive feedback for future editions will be compiled here.\n\n---\n\n*This page is automatically updated when participants submit their feedback through our anonymous chat.*';
+            return '# Crowdsourcing Great Ideas for World Economy\n## A Living Repository of Novel Economic Solutions\n\n### Abstract\n\nThis whitepaper presents a curated collection of breakthrough economic ideas sourced through collaborative intelligence.\n\n## Novel Economic Models\n\nNo verified novel models documented yet.\n\n## Innovative Economic Combinations\n\nNo verified combinations documented yet.\n\n---\n\n*This document is automatically curated through AI-assisted evaluation of crowd-sourced economic ideas.*';
         }
 
-        async function generateIncrementalSummary(currentContent, newSummary) {
-            const response = await fetch('/api/summarize', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    currentContent: currentContent,
-                    newSummary: newSummary,
-                    type: 'combine_summaries'
-                })
-            });
+        function markdownToHtml(markdown) {
+            // Basic markdown to HTML conversion
+            return markdown
+                .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                .replace(/^\* (.*$)/gm, '<li>$1</li>')
+                .replace(/^- (.*$)/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/^(.)/gm, '<p>$1')
+                .replace(/(.)$/gm, '$1</p>')
+                .replace(/<p><h/g, '<h')
+                .replace(/<\/h([1-6])><\/p>/g, '</h$1>')
+                .replace(/<p><ul>/g, '<ul>')
+                .replace(/<\/ul><\/p>/g, '</ul>');
+        }
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Combine summaries API error: ${errorData.error || response.statusText}`);
+        function toggleSummaryPanel() {
+            const panel = document.getElementById('summaryPanel');
+            const toggle = document.getElementById('summaryToggle');
+            
+            summaryVisible = !summaryVisible;
+            
+            if (summaryVisible) {
+                panel.classList.add('visible');
+                toggle.textContent = 'Hide Research';
+                toggle.classList.add('active');
+                loadSummaryContent(); // Load content when showing
+            } else {
+                panel.classList.remove('visible');
+                toggle.textContent = 'Show Research';
+                toggle.classList.remove('active');
             }
-
-            const data = await response.json();
-            return data.result;
         }
 
-        function generateChatSummary() {
-            const timestamp = new Date().toISOString();
-            let summary = `## Chat Summary (${timestamp})\n\n`;
+        function toggleSummaryPosition() {
+            const container = document.getElementById('mainContainer');
+            const toggle = document.getElementById('positionToggle');
             
-            chatHistory.forEach((entry, index) => {
-                summary += `**${entry.type.toUpperCase()}**: ${entry.message}\n\n`;
-            });
-            
-            return summary;
+            if (summaryPosition === 'right') {
+                summaryPosition = 'left';
+                container.className = 'main-container summary-left';
+                toggle.textContent = 'Move Right';
+            } else {
+                summaryPosition = 'right';
+                container.className = 'main-container summary-right';
+                toggle.textContent = 'Move Left';
+            }
         }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up periodic summary refresh
+            setInterval(async () => {
+                if (summaryVisible) {
+                    await loadSummaryContent();
+                }
+            }, 60000); // Refresh every minute
+            
+            // Load initial summary if needed
+            if (summaryVisible) {
+                loadSummaryContent();
+            }
+        });
 
         // Allow Enter key to send message
         document.getElementById('messageInput').addEventListener('keypress', function(e) {

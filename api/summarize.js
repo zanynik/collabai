@@ -19,52 +19,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { chatHistory, currentContent, type, userName } = req.body;
+    const { conversationSummary, currentContent, type, userName } = req.body;
 
     if (!process.env.OPENAI_API_KEY) {
       res.status(500).json({ error: 'OpenAI API key not configured' });
       return;
     }
 
-    let prompt, messages;
+    let messages;
 
-    if (type === 'summarize_chat') {
-      // Generate summary from chat history
-      if (!chatHistory || !Array.isArray(chatHistory)) {
-        res.status(400).json({ error: 'Chat history is required for summarization' });
-        return;
-      }
-
-      const chatText = chatHistory.map(entry => 
-        `${entry.type.toUpperCase()}: ${entry.message}`
-      ).join('\n\n');
-
-      const nameNote = userName ? ` (This feedback is from ${userName})` : ' (Anonymous feedback)';
-
-      messages = [
-        {
-          role: 'system',
-          content: `You are the summarizer for Nomad Fest Switzerland community feedback.
-Your job is to create concise summaries from participant feedback conversations.
-
-Instructions:
-- Focus on what participants found meaningful: workshops, talks, hikes, ceremonies, community dinners, networking, insights, personal growth.
-- Discard trivial or logistical info (number of participants, meal times, bus schedules, maps).
-- Extract key experiences, learnings, and constructive suggestions.
-- Format as clear, community-oriented markdown with bullet points.
-- Keep it concise but capture the essence of what made the experience meaningful.
-- If participant provided a name, include it as attribution like "- Workshop on X was amazing (Sarah)" or "- Great networking (Alex)"`
-        },
-        {
-          role: 'user',
-          content: `Please summarize this participant feedback conversation${nameNote}:\n\n${chatText}`
-        }
-      ];
-
-    } else if (type === 'combine_summaries') {
-      // Combine existing content with new summary
-      if (!currentContent || !req.body.newSummary) {
-        res.status(400).json({ error: 'Current content and new summary are required for combining' });
+    if (type === 'integrate_content') {
+      // Integrate conversation summary into existing content
+      if (!currentContent || !conversationSummary) {
+        res.status(400).json({ error: 'Current content and conversation summary are required for integration' });
         return;
       }
 
@@ -98,12 +65,12 @@ Required Format:
         },
         {
           role: 'user',
-          content: `Current summary:\n${currentContent}\n\nNew feedback to incorporate:\n${req.body.newSummary}\n\nPlease create an updated community summary that incorporates the new feedback while maintaining the required format.`
+          content: `Current summary:\n${currentContent}\n\nConversation insights to incorporate:\n${JSON.stringify(conversationSummary, null, 2)}\n\nPlease create an updated community summary that incorporates the new insights while maintaining the required format.`
         }
       ];
 
     } else {
-      res.status(400).json({ error: 'Invalid type. Use "summarize_chat" or "combine_summaries"' });
+      res.status(400).json({ error: 'Invalid type. Use "integrate_content"' });
       return;
     }
 
@@ -117,7 +84,7 @@ Required Format:
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
         messages: messages,
-        max_tokens: type === 'summarize_chat' ? 300 : 800,
+        max_tokens: 800,
         temperature: 0.3
       })
     });
@@ -138,9 +105,9 @@ Required Format:
     });
 
   } catch (error) {
-    console.error('Summarize API error:', error);
+    console.error('Content integration API error:', error);
     res.status(500).json({ 
-      error: 'Failed to process summarization request',
+      error: 'Failed to process content integration request',
       details: error.message 
     });
   }
