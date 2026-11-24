@@ -1,0 +1,39 @@
+{
+  "id": "four-day-week",
+  "motion": "Our city should move municipal staff to a four-day, 32-hour work week.",
+  "propositions": [
+    { "id": "P1", "text": "A four-day week keeps output per employee roughly the same.", "agree": 3, "disagree": 4 },
+    { "id": "P2", "text": "It would meaningfully improve staff retention.", "agree": 6, "disagree": 1 },
+    { "id": "P3", "text": "Residents would face reduced access to services.", "agree": 3, "disagree": 3 },
+    { "id": "P4", "text": "Services can be kept open five days with staggered shifts.", "agree": 2, "disagree": 2 },
+    { "id": "P5", "text": "Trial programmes elsewhere were run in comparable public-sector settings.", "agree": 1, "disagree": 3 },
+    { "id": "P6", "text": "Hiring more staff to cover gaps would raise costs.", "agree": 5, "disagree": 0 }
+  ],
+  "arguments": [
+    {
+      "id": "A1", "side": "pro", "author": "Rae",
+      "text": "If output stays flat and retention goes up, the change is clearly worth it — and pilots show output does stay flat.",
+      "premises": ["P1 & P2 -> M", "P1", "P2"], "conclusion": "M"
+    },
+    {
+      "id": "A2", "side": "pro", "author": "Sam",
+      "text": "Staggered shifts mean the public never notices the difference.",
+      "premises": ["P4 -> !P3"], "conclusion": "M"
+    },
+    {
+      "id": "A3", "side": "con", "author": "Jo",
+      "text": "Either service access drops or we hire more people; both are unacceptable, so we shouldn't do it.",
+      "premises": ["P3 | P6", "P3 -> !M", "P6 -> !M"], "conclusion": "!M"
+    },
+    {
+      "id": "A4", "side": "con", "author": "Lee",
+      "text": "The pilot results don't transfer: they weren't public sector, so we can't assume output holds, and without that the case fails.",
+      "premises": ["!P5 -> !P1", "!P5", "!P1 -> !M"], "conclusion": "!M"
+    },
+    {
+      "id": "A5", "side": "pro", "author": "Rae",
+      "text": "Staggered shifts work, and if they work access doesn't drop, so access will drop for no one.",
+      "premises": ["P4", "P4 -> !P3", "P3"], "conclusion": "M"
+    }
+  ]
+}

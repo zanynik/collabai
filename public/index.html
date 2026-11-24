@@ -1,497 +1,623 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Economy Ideas - Crowdsourcing Platform</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        .main-container {
-            display: flex;
-            flex: 1;
-            flex-direction: row;
-            overflow: hidden;
-        }
-        .main-container.summary-left {
-            flex-direction: row;
-        }
-        .main-container.summary-right {
-            flex-direction: row-reverse;
-        }
-        .chat-panel {
-            flex: 1;
-            background: white;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            min-width: 400px;
-            height: 100%;
-            overflow-y: auto;
-        }
-        .summary-panel {
-            flex: 1;
-            background: #fafafa;
-            border-left: 1px solid #ddd;
-            padding: 20px;
-            overflow-y: auto;
-            min-width: 400px;
-            display: none;
-            height: 100%;
-        }
-        .summary-panel.visible {
-            display: block;
-        }
-        .main-container.summary-right .summary-panel {
-            border-left: none;
-            border-right: 1px solid #ddd;
-        }
-        .chat-log {
-            flex: 1;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-bottom: 15px;
-            background-color: #fafafa;
-            border-radius: 5px;
-            min-height: 300px;
-        }
-        .message {
-            margin-bottom: 10px;
-            padding: 8px;
-            border-radius: 5px;
-        }
-        .user-message {
-            background-color: #007bff;
-            color: white;
-            text-align: right;
-        }
-        .bot-message {
-            background-color: #e9ecef;
-            color: #333;
-        }
-        .input-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        textarea {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            resize: vertical;
-            min-height: 60px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-        .submit-summary-btn {
-            background-color: #28a745;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .submit-summary-btn:hover {
-            background-color: #1e7e34;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .header {
-            background: white;
-            padding: 15px 20px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .nav-controls {
-            display: flex;
-            gap: 10px;
-        }
-        .toggle-btn {
-            padding: 8px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .toggle-btn:hover {
-            background-color: #0056b3;
-        }
-        .toggle-btn.active {
-            background-color: #28a745;
-        }
-        .summary-content {
-            line-height: 1.6;
-        }
-        .summary-content h1 {
-            color: #333;
-            margin-top: 0;
-        }
-        .summary-content h2 {
-            color: #555;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-        }
-        .summary-content ul {
-            padding-left: 20px;
-        }
-        .summary-loading {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-        }
-        @media (max-width: 768px) {
-            .main-container {
-                flex-direction: column;
-            }
-            .summary-panel {
-                border-left: none;
-                border-top: 1px solid #ddd;
-                min-width: auto;
-                max-height: 50vh;
-            }
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agora — debates that converge</title>
+<meta name="description" content="Debate with AI that maps every argument into logic and a theorem prover that checks it, so discussions converge on the questions that matter.">
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1c1a; --muted: #6b6862; --line: #e4e1da;
+  --accent: #3b5bdb; --accent-ink: #ffffff; --accent-soft: #e7ecff;
+  --pro: #1f7a4d; --pro-soft: #e3f4ea; --con: #b4361f; --con-soft: #fbe7e2; --other: #6b6862; --other-soft: #eeece7;
+  --ok: #1f7a4d; --warn: #a15c00; --warn-soft: #fff2db; --bad: #b4361f; --bad-soft: #fbe7e2;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: ui-sans-serif, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141413; --panel: #1d1d1b; --ink: #ecebe7; --muted: #9c9890; --line: #33322e;
+    --accent: #7c95ff; --accent-ink: #0d0d0c; --accent-soft: #232a45;
+    --pro: #5ccf93; --pro-soft: #17301f; --con: #ff8a73; --con-soft: #3a1d17; --other: #b3afa6; --other-soft: #2a2926;
+    --ok: #5ccf93; --warn: #ffbf5c; --warn-soft: #3a2c12; --bad: #ff8a73; --bad-soft: #3a1d17;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 6px 12px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+.btn.ghost:hover { color: var(--ink); }
+.btn:disabled { opacity: .5; cursor: default; }
+.mono { font-family: var(--mono); font-size: 13px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+header.top { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 5; }
+.brand { font-weight: 750; letter-spacing: -.02em; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+.brand svg { width: 22px; height: 22px; }
+.top .spacer { flex: 1; }
+.top select { min-width: 0; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 6px 8px; max-width: 220px; }
+
+.motion { padding: 20px 20px 4px; max-width: 1400px; margin: 0 auto; }
+.motion .label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.motion h1 { margin: 2px 0 0; font-size: 24px; line-height: 1.25; letter-spacing: -.01em; outline: none; border-radius: 6px; }
+.motion h1:focus { box-shadow: 0 0 0 2px var(--accent-soft); }
+.stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; font-size: 13px; }
+.stat b { font-variant-numeric: tabular-nums; }
+
+main { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; padding: 16px 20px 40px; max-width: 1400px; margin: 0 auto; }
+@media (max-width: 900px) { main { grid-template-columns: minmax(0, 1fr); padding: 12px 16px 32px; } .motion { padding: 16px 16px 0; } header.top { padding: 10px 16px; } }
+@media (max-width: 600px) {
+  header.top { flex-wrap: wrap; gap: 8px; }
+  header.top .spacer { display: none; }
+  .top select { order: 10; flex: 1 1 100%; max-width: none; }
+  .motion h1 { font-size: 20px; }
+  .panel > .hd { flex-wrap: wrap; }
+  .filters { margin-left: 0; flex-wrap: wrap; }
+  .arg .meta { flex-wrap: wrap; }
+  .proposal .field { grid-template-columns: 1fr; gap: 2px; }
+}
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+.panel > .hd { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.panel > .hd h2 { font-size: 14px; margin: 0; font-weight: 650; }
+.panel > .bd { padding: 14px 16px; }
+
+.filters { display: flex; gap: 4px; margin-left: auto; }
+.filters button { border: 0; background: transparent; padding: 3px 9px; border-radius: 999px; color: var(--muted); font-size: 13px; }
+.filters button.on { background: var(--other-soft); color: var(--ink); }
+
+.args { display: flex; flex-direction: column; gap: 10px; }
+.arg { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; border-left: 4px solid var(--other); }
+.arg.pro { border-left-color: var(--pro); } .arg.con { border-left-color: var(--con); }
+.arg .meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.arg .meta .id { font-family: var(--mono); font-weight: 600; color: var(--ink); }
+.arg .text { margin: 6px 0 8px; }
+.side { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 1px 7px; border-radius: 999px; }
+.side.pro { background: var(--pro-soft); color: var(--pro); } .side.con { background: var(--con-soft); color: var(--con); } .side.other { background: var(--other-soft); color: var(--other); }
+.verdict { margin-left: auto; font-size: 12px; font-weight: 650; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+.verdict.ok { background: var(--pro-soft); color: var(--ok); }
+.verdict.gap { background: var(--bad-soft); color: var(--bad); }
+.verdict.vac, .verdict.err { background: var(--warn-soft); color: var(--warn); }
+.formal { font-family: var(--mono); font-size: 13px; background: var(--bg); border-radius: 8px; padding: 8px 10px; display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
+.formal .prem { padding: 1px 6px; border-radius: 5px; border: 1px dashed transparent; }
+.formal .prem.lb { border-color: var(--accent); background: var(--accent-soft); }
+.formal .turnstile { color: var(--muted); padding: 0 4px; }
+.atom { font-weight: 650; text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
+.atom.M { color: var(--accent); }
+.note { margin-top: 8px; font-size: 13px; padding: 8px 10px; border-radius: 8px; }
+.note.gap { background: var(--bad-soft); }
+.note.vac { background: var(--warn-soft); }
+.arg .del { margin-left: 4px; }
+.empty { color: var(--muted); text-align: center; padding: 24px 8px; font-size: 14px; }
+
+.composer { margin-top: 16px; }
+.composer .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.seg button.on[data-side=pro] { background: var(--pro-soft); color: var(--pro); }
+.seg button.on[data-side=con] { background: var(--con-soft); color: var(--con); }
+.seg button.on[data-side=other] { background: var(--other-soft); color: var(--ink); }
+input.text, textarea { width: 100%; border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+textarea { min-height: 84px; resize: vertical; margin: 10px 0; }
+input.text:focus, textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+.proposal { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: var(--radius); padding: 12px; margin-top: 10px; }
+.proposal h3 { margin: 0 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); }
+.proposal .field { display: grid; grid-template-columns: 90px 1fr; gap: 8px; align-items: center; margin: 6px 0; }
+.proposal .field label { font-size: 13px; color: var(--muted); }
+.proposal ul { margin: 4px 0 8px 18px; padding: 0; font-size: 14px; }
+.err-msg { color: var(--bad); font-size: 13px; margin-top: 6px; }
+.syntax { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+.tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tabs button { border: 0; background: transparent; padding: 8px 12px; color: var(--muted); font-weight: 600; font-size: 14px; border-bottom: 2px solid transparent; white-space: nowrap; }
+.tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
+.tabs .count { font-size: 11px; background: var(--other-soft); border-radius: 999px; padding: 0 6px; margin-left: 4px; }
+.side-col { position: sticky; top: 76px; align-self: start; max-height: calc(100vh - 90px); display: flex; flex-direction: column; }
+.side-col .bd { overflow-y: auto; }
+@media (max-width: 900px) { .side-col { position: static; max-height: none; } }
+
+.q { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-bottom: 10px; }
+.q .kind { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); }
+.q .question { font-weight: 600; margin: 4px 0; }
+.q .why { font-size: 13px; color: var(--muted); }
+.synthesis { font-size: 14px; background: var(--bg); padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; }
+
+.crux { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-bottom: 10px; }
+.crux .head { display: flex; gap: 8px; align-items: baseline; }
+.crux .score { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.bar { height: 6px; border-radius: 99px; background: var(--con-soft); overflow: hidden; margin: 8px 0 4px; }
+.bar > span { display: block; height: 100%; background: var(--pro); }
+
+.prop { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.prop:last-child { border-bottom: 0; }
+.prop .pid { font-family: var(--mono); font-weight: 700; min-width: 30px; }
+.prop .ptext { flex: 1; }
+.votes { display: flex; gap: 4px; }
+.votes button { border: 1px solid var(--line); background: transparent; border-radius: 6px; padding: 1px 7px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.votes button.mine[data-v=agree] { background: var(--pro-soft); border-color: var(--pro); color: var(--pro); }
+.votes button.mine[data-v=disagree] { background: var(--con-soft); border-color: var(--con); color: var(--con); }
+
+pre.lean { font-family: var(--mono); font-size: 12px; line-height: 1.5; background: var(--bg); border-radius: 8px; padding: 12px; overflow-x: auto; margin: 10px 0 0; white-space: pre; }
+.badge { display: inline-block; font-size: 13px; padding: 4px 10px; border-radius: 8px; }
+.badge.ok { background: var(--pro-soft); color: var(--ok); }
+.badge.soft { background: var(--other-soft); }
+.contra { background: var(--warn-soft); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 10px; font-size: 14px; }
+
+.howto { font-size: 14px; }
+.howto ol { padding-left: 20px; }
+.howto li { margin-bottom: 6px; }
+.spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -1px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 20; max-width: calc(100vw - 32px); }
+.toast.show { opacity: 1; }
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1>Crowdsourcing Great Ideas for World Economy</h1>
-        <div class="nav-controls">
-            <button class="toggle-btn" id="summaryToggle" onclick="toggleSummaryPanel()">Show Research</button>
-            <button class="toggle-btn" id="positionToggle" onclick="toggleSummaryPosition()">Move Right</button>
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 21h18M5 21V10m4.67 11V10m4.66 11V10M19 21V10M2 10l10-7 10 7z"/></svg>
+    Agora
+  </div>
+  <div class="spacer"></div>
+  <select id="debatePicker" aria-label="Choose debate"></select>
+  <button class="btn" id="newDebate">New</button>
+  <button class="btn ghost" id="exportBtn" title="Download this debate as JSON">Export</button>
+  <button class="btn ghost" id="importBtn" title="Load a debate JSON file">Import</button>
+  <input type="file" id="importFile" accept="application/json" hidden>
+</header>
+
+<section class="motion">
+  <div class="label">Motion · <span class="mono">M</span></div>
+  <h1 id="motion" contenteditable="true" spellcheck="false"></h1>
+  <div class="stats" id="stats"></div>
+</section>
+
+<main>
+  <div>
+    <section class="panel">
+      <div class="hd">
+        <h2>Arguments</h2>
+        <div class="filters" id="filters">
+          <button data-f="all" class="on">All</button>
+          <button data-f="pro">Pro</button>
+          <button data-f="con">Con</button>
+          <button data-f="issues">Needs work</button>
         </div>
+      </div>
+      <div class="bd"><div class="args" id="args"></div></div>
+    </section>
+
+    <section class="panel composer">
+      <div class="hd"><h2>Make an argument</h2></div>
+      <div class="bd">
+        <div class="row">
+          <input class="text" id="author" placeholder="Your name (optional)" style="max-width:200px">
+          <div class="seg" id="sidePicker">
+            <button data-side="pro" class="on">For</button>
+            <button data-side="con">Against</button>
+            <button data-side="other">Neither</button>
+          </div>
+        </div>
+        <textarea id="argText" placeholder="Make your case in plain language. The Formalizer will map it onto the debate's shared claims, and the prover will check whether it actually follows."></textarea>
+        <div class="row">
+          <button class="btn primary" id="formalizeBtn">Formalize with AI</button>
+          <button class="btn ghost" id="manualBtn">Write it formally</button>
+          <span class="muted small" id="composerStatus"></span>
+        </div>
+        <div id="proposal"></div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="panel side-col">
+    <nav class="tabs" id="tabs">
+      <button data-tab="next" class="on">Next questions</button>
+      <button data-tab="cruxes">Cruxes<span class="count" id="cCruxes">0</span></button>
+      <button data-tab="props">Claims<span class="count" id="cProps">0</span></button>
+      <button data-tab="lean">Proof</button>
+      <button data-tab="how">How it works</button>
+    </nav>
+    <div class="bd" id="tabBody"></div>
+  </aside>
+</main>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+// ----------------------------------------------------------------- state
+const STORE = 'agora.v2';
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const safeStorage = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+let store = safeStorage.get(STORE) ?? { debates: {}, current: null, myVotes: {} };
+let analysis = null;
+let facilitation = {};          // debateId -> facilitator result
+let ui = { filter: 'all', tab: 'next', side: 'pro', proposal: null, busy: false };
+
+const debate = () => store.debates[store.current];
+const save = () => safeStorage.set(STORE, store);
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+async function ensureDebate() {
+  if (store.current && store.debates[store.current]) return;
+  const ex = await fetch('example-debate.json').then((r) => r.json());
+  store.debates[ex.id] = ex;
+  store.current = ex.id;
+  save();
+}
+
+// ----------------------------------------------------------------- api
+async function api(name, body) {
+  const res = await fetch(`/api/${name}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+let analyzeSeq = 0;
+async function reanalyze() {
+  const seq = ++analyzeSeq;
+  try {
+    const r = await api('analyze', { debate: debate() });
+    if (seq !== analyzeSeq) return;
+    analysis = r;
+  } catch (e) {
+    if (seq !== analyzeSeq) return;
+    analysis = null;
+    toast(`Analysis failed: ${e.message}`);
+  }
+  render();
+}
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ----------------------------------------------------------------- formulas
+// Render a formula string with atoms as hoverable chips showing the claim text.
+function fmt(formula) {
+  const d = debate();
+  const texts = Object.fromEntries(d.propositions.map((p) => [p.id, p.text]));
+  texts.M = d.motion;
+  return esc(formula).replace(/\b(M|P\d+)\b/g, (id) =>
+    `<span class="atom ${id === 'M' ? 'M' : ''}" title="${esc(texts[id] ?? 'unknown claim')}">${id}</span>`);
+}
+
+// ----------------------------------------------------------------- render
+function render() {
+  const d = debate();
+  renderPicker();
+  const m = $('#motion');
+  if (document.activeElement !== m) m.textContent = d.motion;
+  renderStats();
+  renderArgs();
+  renderProposal();
+  renderTabs();
+}
+
+function renderPicker() {
+  const sel = $('#debatePicker');
+  sel.innerHTML = Object.values(store.debates)
+    .map((d) => `<option value="${esc(d.id)}" ${d.id === store.current ? 'selected' : ''}>${esc(d.motion.slice(0, 60) || 'Untitled')}</option>`).join('');
+}
+
+function renderStats() {
+  const s = analysis?.stats;
+  if (!s) { $('#stats').innerHTML = '<span class="stat muted">Analyzing…</span>'; return; }
+  const v = analysis.verification;
+  $('#stats').innerHTML = [
+    `<span class="stat"><b>${s.pro}</b> for · <b>${s.con}</b> against</span>`,
+    `<span class="stat"><b>${s.valid}</b>/${s.arguments} arguments follow</span>`,
+    s.invalid ? `<span class="stat" style="color:var(--bad)"><b>${s.invalid}</b> with gaps</span>` : '',
+    s.vacuous ? `<span class="stat" style="color:var(--warn)"><b>${s.vacuous}</b> self-contradictory</span>` : '',
+    s.contradictions ? `<span class="stat" style="color:var(--warn)"><b>${s.contradictions}</b> side inconsistent</span>` : '',
+    `<span class="stat"><b>${s.cruxes}</b> crux${s.cruxes === 1 ? '' : 'es'}</span>`,
+    `<span class="stat muted">${v?.kernelChecked ? '✓ Lean 4 kernel-checked' : 'checked by truth table'}</span>`,
+  ].join('');
+}
+
+function verdictOf(a) {
+  if (!a) return { cls: 'err', label: '…' };
+  if (a.errors.length) return { cls: 'err', label: 'Malformed' };
+  if (a.vacuous) return { cls: 'vac', label: 'Self-contradictory' };
+  if (a.valid) return { cls: 'ok', label: '✓ Follows' };
+  return { cls: 'gap', label: '✗ Gap' };
+}
+
+function renderArgs() {
+  const d = debate();
+  const byId = Object.fromEntries((analysis?.arguments ?? []).map((a) => [a.id, a]));
+  let list = d.arguments;
+  if (ui.filter === 'pro' || ui.filter === 'con') list = list.filter((a) => a.side === ui.filter);
+  if (ui.filter === 'issues') list = list.filter((a) => { const r = byId[a.id]; return r && (r.valid === false || r.vacuous || r.errors.length); });
+  if (!list.length) {
+    $('#args').innerHTML = `<div class="empty">${d.arguments.length ? 'Nothing matches this filter.' : 'No arguments yet. Make the first one below.'}</div>`;
+    return;
+  }
+  $('#args').innerHTML = list.map((a) => {
+    const r = byId[a.id];
+    const v = verdictOf(r);
+    const prem = (r?.premises.length ? r.premises : a.premises).map((p, i) =>
+      `<span class="prem ${r?.loadBearing.includes(i) ? 'lb' : ''}" title="${r?.loadBearing.includes(i) ? 'Load-bearing: remove it and the argument fails' : ''}">${fmt(p)}</span>`).join('<span class="muted">,</span>');
+    let note = '';
+    if (r?.errors.length) note = `<div class="note vac">${esc(r.errors.join('; '))}</div>`;
+    else if (r?.vacuous) note = `<div class="note vac">These premises can't all be true together, so the argument proves nothing. Drop or revise one.</div>`;
+    else if (r?.valid === false) {
+      const ce = analysis.gaps.find((g) => g.argId === a.id)?.counterexample ?? [];
+      note = `<div class="note gap"><b>Doesn't follow yet.</b> All the premises could hold while the conclusion fails, e.g. when:
+        <ul style="margin:4px 0 0 18px;padding:0">${ce.map((c) => `<li><span class="mono">${c.id}</span> is <b>${c.value ? 'true' : 'false'}</b>: ${esc(c.text)}</li>`).join('')}</ul>
+        What unstated assumption rules this out?</div>`;
+    }
+    return `<article class="arg ${a.side}">
+      <div class="meta"><span class="id">${esc(a.id)}</span><span class="side ${a.side}">${a.side === 'other' ? 'neither' : a.side}</span>
+        <span>${esc(a.author || 'anonymous')}</span>
+        <span class="verdict ${v.cls}">${v.label}</span>
+        <button class="btn ghost del small" data-del="${esc(a.id)}" title="Remove argument" aria-label="Remove ${esc(a.id)}">✕</button></div>
+      ${a.text ? `<div class="text">${esc(a.text)}</div>` : ''}
+      <div class="formal">${prem || '<span class="muted">(no premises)</span>'}<span class="turnstile">⊢</span><span>${fmt(r?.conclusion ?? a.conclusion)}</span></div>
+      ${note}
+    </article>`;
+  }).join('');
+}
+
+function renderProposal() {
+  const p = ui.proposal;
+  const el = $('#proposal');
+  if (!p) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="proposal">
+    <h3>${p.manual ? 'Formal argument' : 'Proposed formalization'}</h3>
+    ${p.restatement ? `<div style="margin-bottom:6px">${esc(p.restatement)}</div>` : ''}
+    ${p.notes ? `<div class="small muted" style="margin-bottom:6px">Interpretation: ${esc(p.notes)}</div>` : ''}
+    ${p.newPropositions.length ? `<div class="small muted">New shared claims this introduces:</div>
+      <ul>${p.newPropositions.map((n) => `<li><span class="mono">${esc(n.id)}</span> ${esc(n.text)}</li>`).join('')}</ul>` : ''}
+    <div class="field"><label for="pPremises">Premises</label><input class="text mono" id="pPremises" value="${esc(p.argument.premises.join(' ; '))}"></div>
+    <div class="field"><label for="pConclusion">Conclusion</label><input class="text mono" id="pConclusion" value="${esc(p.argument.conclusion)}"></div>
+    <div class="syntax">Separate premises with <span class="mono">;</span> — connectives: <span class="mono">! &amp; | -&gt; &lt;-&gt;</span>. Use <span class="mono">M</span> for the motion and claim ids from the Claims tab.</div>
+    ${p.error ? `<div class="err-msg">${esc(p.error)}</div>` : ''}
+    <div class="row" style="margin-top:10px">
+      <button class="btn primary" id="acceptBtn">Add to debate</button>
+      <button class="btn ghost" id="discardBtn">Discard</button>
     </div>
+  </div>`;
+}
 
-    <div class="main-container" id="mainContainer">
-        <div class="chat-panel">
-            <div class="chat-log" id="chatLog">
-                <div class="message bot-message">
-                    Hi! Share your breakthrough economic idea. I'll evaluate if it's truly novel or a unique practical combination of existing concepts.
-                </div>
-            </div>
-            
-            <div class="input-container">
-                <textarea id="messageInput" placeholder="Describe your economic idea here..."></textarea>
-                <button onclick="sendMessage()">Send</button>
-            </div>
-        </div>
-        
-        <div class="summary-panel" id="summaryPanel">
-            <div class="summary-content" id="summaryContent">
-                <div class="summary-loading">Loading economic research repository...</div>
-            </div>
-        </div>
-    </div>
+function renderTabs() {
+  document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
+  $('#cCruxes').textContent = analysis?.cruxes.length ?? 0;
+  $('#cProps').textContent = debate().propositions.length;
+  const body = $('#tabBody');
+  body.innerHTML = { next: tabNext, cruxes: tabCruxes, props: tabProps, lean: tabLean, how: tabHow }[ui.tab]();
+}
 
-    <script>
-        let chatHistory = [];
-        let isLoading = false;
-        let summaryVisible = false;
-        let summaryPosition = 'right'; // 'left' or 'right'
-        let lastUpdateTime = 0;
-        let conversationCount = 0;
+function tabNext() {
+  const f = facilitation[store.current];
+  const contra = (analysis?.contradictions ?? []).filter((c) => c.members.length).map((c) =>
+    `<div class="contra"><b>The ${c.side} side contradicts itself.</b> These can't all be true: ${c.members.map((m) => `<span class="mono">${fmt(m.formula)}</span> (${esc(m.argId)})`).join(', ')}</div>`).join('');
+  return `${contra}
+    <p class="small muted" style="margin-top:0">The Facilitator reads the checked analysis and asks the questions most likely to move the debate. It never picks a winner.</p>
+    <button class="btn primary" id="facilitateBtn" ${ui.busy === 'facilitate' ? 'disabled' : ''}>${ui.busy === 'facilitate' ? '<span class="spinner"></span> Thinking…' : f ? 'Refresh questions' : 'Suggest next questions'}</button>
+    <div style="margin-top:14px">
+    ${f ? `<div class="synthesis">${esc(f.synthesis)}</div>` + f.prompts.map((q) => `<div class="q">
+        <div class="kind">${esc(q.kind.replace('_', ' '))} · ${esc(q.target)} · for ${esc(q.audience)}</div>
+        <div class="question">${fmt(q.question)}</div>
+        <div class="why">${fmt(q.why)}</div>
+        <button class="btn small" style="margin-top:8px" data-answer="${esc(q.audience)}" data-q="${esc(q.question)}">Answer this</button>
+      </div>`).join('') : ''}
+    </div>`;
+}
 
-        async function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const sendButton = document.querySelector('button[onclick="sendMessage()"]');
-            const message = input.value.trim();
-            
-            if (!message || isLoading) return;
+function tabCruxes() {
+  const cs = analysis?.cruxes ?? [];
+  if (!cs.length) return `<div class="empty">No cruxes yet. A crux appears when sound arguments on both sides lean on the same claim, or when people are split on a claim an argument needs.</div>`;
+  return `<p class="small muted" style="margin-top:0">Settle these and the debate moves. A crux is a claim that sound arguments on both sides depend on, or one an argument needs that people are split on.</p>` +
+    cs.map((c) => {
+      const total = c.agree + c.disagree;
+      return `<div class="crux">
+        <div class="head"><span class="mono" style="font-weight:700">${esc(c.id)}</span><span style="font-weight:600">${esc(c.text)}</span><span class="score">score ${c.score}</span></div>
+        <div class="bar" title="${c.agree} agree / ${c.disagree} disagree"><span style="width:${total ? (100 * c.agree) / total : 50}%"></span></div>
+        <div class="small muted">${c.agree} agree · ${c.disagree} disagree · for-arguments relying on it: ${c.proArgs.join(', ') || 'none'} · against: ${c.conArgs.join(', ') || 'none'}</div>
+      </div>`;
+    }).join('');
+}
 
-            // Add user message to chat
-            addMessageToChat('user', message);
-            chatHistory.push({type: 'user', message: message, timestamp: new Date()});
-            conversationCount++;
-            
-            // Clear input and disable button
-            input.value = '';
-            sendButton.disabled = true;
-            isLoading = true;
+function tabProps() {
+  const d = debate();
+  const mine = store.myVotes[store.current] ?? {};
+  if (!d.propositions.length) return `<div class="empty">Shared claims show up here as arguments are formalized. Vote on them; disagreement on a load-bearing claim makes it a crux.</div>`;
+  return d.propositions.map((p) => `<div class="prop">
+      <span class="pid">${esc(p.id)}</span><span class="ptext">${esc(p.text)}</span>
+      <span class="votes">
+        <button data-vote="${esc(p.id)}" data-v="agree" class="${mine[p.id] === 'agree' ? 'mine' : ''}" title="Agree">▲ ${p.agree}</button>
+        <button data-vote="${esc(p.id)}" data-v="disagree" class="${mine[p.id] === 'disagree' ? 'mine' : ''}" title="Disagree">▼ ${p.disagree}</button>
+      </span></div>`).join('');
+}
 
-            try {
-                // Call our chat API
-                const botResponse = await callChatAPI(message);
-                addMessageToChat('bot', botResponse);
-                chatHistory.push({type: 'bot', message: botResponse, timestamp: new Date()});
-                conversationCount++;
-                
-                // Check if we should analyze and potentially update summary
-                await checkForSummaryUpdate();
-            } catch (error) {
-                console.error('Error calling chat API:', error);
-                addMessageToChat('bot', 'Sorry, I encountered an error. Please try again.');
-            } finally {
-                sendButton.disabled = false;
-                isLoading = false;
-            }
-        }
+function tabLean() {
+  if (!analysis) return '<div class="empty">No analysis yet.</div>';
+  const v = analysis.verification ?? {};
+  const status = v.kernelChecked
+    ? `<span class="badge ok">✓ Every theorem below was checked by the Lean 4 kernel${v.leanVersion ? ` (${esc(v.leanVersion)})` : ''}</span>`
+    : `<span class="badge soft">Verdicts from exhaustive truth tables. Connect a Lean checker (<span class="mono">LEAN_SERVER_URL</span>) to have the kernel certify them.</span>`;
+  const problems = v.checker === 'lean4' && !v.kernelChecked && v.messages?.length ? `<pre class="lean">${esc(v.messages.join('\n'))}</pre>` : '';
+  return `${status}${v.error ? `<div class="err-msg">${esc(v.error)}</div>` : ''}${problems}
+    <div class="row" style="margin-top:10px"><button class="btn small" id="copyLean">Copy Lean source</button>
+    <span class="small muted">${analysis.lean.theorems.length} theorem${analysis.lean.theorems.length === 1 ? '' : 's'}</span></div>
+    <pre class="lean">${esc(analysis.lean.source)}</pre>`;
+}
 
-        async function callChatAPI(userMessage) {
-            
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: userMessage,
-                    chatHistory: chatHistory.slice(-10) // Send last 10 messages for context
-                })
-            });
+function tabHow() {
+  return `<div class="howto">
+    <p style="margin-top:0">Most debates go in circles because people talk past each other. Agora makes the structure of the disagreement visible and checkable.</p>
+    <ol>
+      <li><b>Argue in plain language.</b> The AI <i>Formalizer</i> maps your argument onto the debate's shared claims (<span class="mono">P1, P2…</span>) as premises and a conclusion. You review it before it's added.</li>
+      <li><b>The logic is checked, not guessed.</b> Every argument becomes a theorem. Agora checks it in every possible world and exports a Lean 4 proof the kernel can verify. The AI translates; it never grades.</li>
+      <li><b>Gaps get counterexamples.</b> If your conclusion doesn't follow, you see the exact situation that breaks it, and the missing assumption becomes something to discuss.</li>
+      <li><b>Contradictions get caught.</b> If a side's claims can't all be true, it's flagged with the smallest conflicting set.</li>
+      <li><b>Cruxes rise to the top.</b> Claims that sound arguments on both sides depend on, or that people are split on, are where minds can change. The <i>Facilitator</i> turns them into the next questions.</li>
+    </ol>
+    <p class="muted small">Every round is a small experiment: argue, check, find the crux, ask a sharper question, repeat. The "follows" ratio and crux count tell you whether the discussion is getting somewhere.</p>
+  </div>`;
+}
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Chat API error: ${errorData.error || response.statusText}`);
-            }
+// ----------------------------------------------------------------- actions
+function nextArgId(d) { return `A${1 + Math.max(0, ...d.arguments.map((a) => Number(a.id.slice(1)) || 0))}`; }
 
-            const data = await response.json();
-            return data.response;
-        }
+async function formalize() {
+  const text = $('#argText').value.trim();
+  if (!text) { toast('Write your argument first'); return; }
+  ui.busy = 'formalize';
+  $('#formalizeBtn').disabled = true;
+  $('#composerStatus').innerHTML = '<span class="spinner"></span> Formalizing…';
+  try {
+    const r = await api('formalize', { debate: debate(), text, side: ui.side, author: $('#author').value.trim() });
+    if (r.argument.side && r.argument.side !== ui.side) {
+      r.notes = `${r.notes ? r.notes + ' ' : ''}(Reads as ${r.argument.side === 'other' ? 'neither for nor against' : r.argument.side === 'pro' ? 'for' : 'against'} the motion; you chose ${ui.side}. Your choice is kept.)`;
+    }
+    r.argument.side = ui.side;
+    ui.proposal = { ...r, text, author: $('#author').value.trim() };
+  } catch (e) {
+    toast(e.message);
+  } finally {
+    ui.busy = false;
+    $('#formalizeBtn').disabled = false;
+    $('#composerStatus').textContent = '';
+    renderProposal();
+  }
+}
 
-        function addMessageToChat(type, message) {
-            const chatLog = document.getElementById('chatLog');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}-message`;
-            messageDiv.textContent = message;
-            chatLog.appendChild(messageDiv);
-            chatLog.scrollTop = chatLog.scrollHeight;
-        }
+function manual() {
+  ui.proposal = {
+    manual: true, text: $('#argText').value.trim(), author: $('#author').value.trim(),
+    newPropositions: [], argument: { side: ui.side, premises: [], conclusion: ui.side === 'con' ? '!M' : 'M' },
+  };
+  renderProposal();
+  $('#pPremises').focus();
+}
 
-        async function checkForSummaryUpdate() {
-            // Only check every 3-5 message exchanges (6-10 total messages)
-            if (conversationCount < 6 || conversationCount % 6 !== 0) {
-                return;
-            }
+async function accept() {
+  const p = ui.proposal;
+  const d = debate();
+  const premises = $('#pPremises').value.split(';').map((s) => s.trim()).filter(Boolean);
+  const conclusion = $('#pConclusion').value.trim();
+  const arg = { id: nextArgId(d), side: ui.side, author: p.author, text: p.text, premises, conclusion };
+  const candidate = { ...d, propositions: [...d.propositions, ...p.newPropositions], arguments: [...d.arguments, arg] };
+  try {
+    const r = await api('analyze', { debate: candidate, verify: false });
+    const errs = r.arguments.find((a) => a.id === arg.id).errors;
+    if (errs.length) { p.error = errs.join('; '); p.argument = { ...p.argument, premises, conclusion }; renderProposal(); return; }
+  } catch (e) { toast(e.message); return; }
+  store.debates[store.current] = candidate;
+  ui.proposal = null;
+  $('#argText').value = '';
+  delete facilitation[store.current];
+  save();
+  reanalyze();
+}
 
-            try {
-                // Get conversation summary
-                const conversationSummary = await getConversationSummary();
-                
-                if (!conversationSummary || conversationSummary.value_level === 'none' || conversationSummary.value_level === 'low') {
-                    return;
-                }
+async function runFacilitator() {
+  ui.busy = 'facilitate';
+  renderTabs();
+  try {
+    facilitation[store.current] = await api('facilitate', { debate: debate() });
+  } catch (e) { toast(e.message); }
+  ui.busy = false;
+  renderTabs();
+}
 
-                // Check if we should update
-                const decision = await getEditingDecision(conversationSummary);
-                
-                if (decision.shouldUpdate) {
-                    await updateSummaryContent(conversationSummary);
-                    await loadSummaryContent(); // Refresh display
-                }
-            } catch (error) {
-                console.error('Error in automated summary update:', error);
-            }
-        }
+function vote(id, v) {
+  const d = debate();
+  const p = d.propositions.find((x) => x.id === id);
+  const mine = (store.myVotes[store.current] ??= {});
+  if (mine[id]) p[mine[id]] = Math.max(0, p[mine[id]] - 1);
+  if (mine[id] === v) delete mine[id];
+  else { p[v] += 1; mine[id] = v; }
+  save();
+  reanalyze();
+}
 
-        async function getConversationSummary() {
-            const response = await fetch('/api/conversation-summary', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    chatHistory: chatHistory
-                })
-            });
+// ----------------------------------------------------------------- events
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('button');
+  if (!t) return;
+  if (t.dataset.f) { ui.filter = t.dataset.f; document.querySelectorAll('#filters button').forEach((b) => b.classList.toggle('on', b === t)); renderArgs(); }
+  else if (t.dataset.tab) { ui.tab = t.dataset.tab; renderTabs(); }
+  else if (t.dataset.side && t.closest('#sidePicker')) {
+    ui.side = t.dataset.side;
+    document.querySelectorAll('#sidePicker button').forEach((b) => b.classList.toggle('on', b === t));
+  }
+  else if (t.dataset.del) {
+    const d = debate();
+    if (!confirm(`Remove ${t.dataset.del}?`)) return;
+    d.arguments = d.arguments.filter((a) => a.id !== t.dataset.del);
+    save(); reanalyze();
+  }
+  else if (t.dataset.vote) vote(t.dataset.vote, t.dataset.v);
+  else if (t.dataset.answer) {
+    const side = t.dataset.answer === 'everyone' ? ui.side : t.dataset.answer;
+    $(`#sidePicker button[data-side="${side}"]`).click();
+    $('#argText').value = `Re: ${t.dataset.q}\n\n`;
+    $('#argText').focus();
+    $('#argText').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  else if (t.id === 'formalizeBtn') formalize();
+  else if (t.id === 'manualBtn') manual();
+  else if (t.id === 'acceptBtn') accept();
+  else if (t.id === 'discardBtn') { ui.proposal = null; renderProposal(); }
+  else if (t.id === 'facilitateBtn') runFacilitator();
+  else if (t.id === 'copyLean') navigator.clipboard.writeText(analysis.lean.source).then(() => toast('Lean source copied'), () => toast('Copy failed'));
+  else if (t.id === 'newDebate') {
+    const motion = prompt('What should we debate? State it as a motion someone can be for or against.');
+    if (!motion?.trim()) return;
+    const id = uid();
+    store.debates[id] = { id, motion: motion.trim(), propositions: [], arguments: [] };
+    store.current = id; save(); reanalyze();
+  }
+  else if (t.id === 'exportBtn') {
+    const blob = new Blob([JSON.stringify(debate(), null, 2)], { type: 'application/json' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `agora-${store.current}.json` });
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+  else if (t.id === 'importBtn') $('#importFile').click();
+});
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Conversation summary API error: ${errorData.error || response.statusText}`);
-            }
+$('#importFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const d = JSON.parse(await file.text());
+    if (typeof d.motion !== 'string' || !Array.isArray(d.arguments)) throw new Error('Not an Agora debate file');
+    d.id = d.id && !store.debates[d.id] ? String(d.id) : uid();
+    d.propositions ??= [];
+    store.debates[d.id] = d; store.current = d.id; save(); reanalyze();
+  } catch (err) { toast(err.message); }
+  e.target.value = '';
+});
 
-            const data = await response.json();
-            return data;
-        }
+$('#debatePicker').addEventListener('change', (e) => { store.current = e.target.value; ui.proposal = null; save(); analysis = null; render(); reanalyze(); });
+$('#motion').addEventListener('blur', (e) => {
+  const v = e.target.textContent.trim();
+  if (v && v !== debate().motion) { debate().motion = v; save(); renderPicker(); reanalyze(); }
+});
+$('#motion').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
 
-        async function getEditingDecision(conversationSummary) {
-            const response = await fetch('/api/editing-decision', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    conversationSummary: conversationSummary,
-                    lastUpdateTime: lastUpdateTime
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Editing decision API error: ${errorData.error || response.statusText}`);
-            }
-
-            const data = await response.json();
-            return data;
-        }
-
-        async function updateSummaryContent(conversationSummary) {
-            // Get current summary content
-            const currentContent = await loadSummaryContent(false);
-            
-            // Call content integration API
-            const response = await fetch('/api/summarize', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    conversationSummary: conversationSummary,
-                    currentContent: currentContent,
-                    type: 'integrate_content'
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Content integration API error: ${errorData.error || response.statusText}`);
-            }
-
-            const data = await response.json();
-            
-            // Update GitHub with new content
-            const updateResponse = await fetch('/api/update-summary', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    updatedContent: data.result
-                })
-            });
-
-            if (!updateResponse.ok) {
-                const errorData = await updateResponse.json();
-                throw new Error(`GitHub update failed: ${errorData.error || updateResponse.statusText}`);
-            }
-
-            lastUpdateTime = Date.now();
-            return data.result;
-        }
-
-        async function loadSummaryContent(displayContent = true) {
-            try {
-                const response = await fetch('/info.md');
-                if (response.ok) {
-                    const content = await response.text();
-                    if (displayContent) {
-                        const summaryContent = document.getElementById('summaryContent');
-                        // Convert markdown to HTML (basic conversion)
-                        const htmlContent = markdownToHtml(content);
-                        summaryContent.innerHTML = htmlContent;
-                    }
-                    return content;
-                }
-            } catch (error) {
-                console.log('Could not fetch current summary');
-                if (displayContent) {
-                    const summaryContent = document.getElementById('summaryContent');
-                    summaryContent.innerHTML = '<div class="summary-loading">Could not load research repository</div>';
-                }
-            }
-            return '# Crowdsourcing Great Ideas for World Economy\n## A Living Repository of Novel Economic Solutions\n\n### Abstract\n\nThis whitepaper presents a curated collection of breakthrough economic ideas sourced through collaborative intelligence.\n\n## Novel Economic Models\n\nNo verified novel models documented yet.\n\n## Innovative Economic Combinations\n\nNo verified combinations documented yet.\n\n---\n\n*This document is automatically curated through AI-assisted evaluation of crowd-sourced economic ideas.*';
-        }
-
-        function markdownToHtml(markdown) {
-            // Basic markdown to HTML conversion
-            return markdown
-                .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                .replace(/^\* (.*$)/gm, '<li>$1</li>')
-                .replace(/^- (.*$)/gm, '<li>$1</li>')
-                .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/^(.)/gm, '<p>$1')
-                .replace(/(.)$/gm, '$1</p>')
-                .replace(/<p><h/g, '<h')
-                .replace(/<\/h([1-6])><\/p>/g, '</h$1>')
-                .replace(/<p><ul>/g, '<ul>')
-                .replace(/<\/ul><\/p>/g, '</ul>');
-        }
-
-        function toggleSummaryPanel() {
-            const panel = document.getElementById('summaryPanel');
-            const toggle = document.getElementById('summaryToggle');
-            
-            summaryVisible = !summaryVisible;
-            
-            if (summaryVisible) {
-                panel.classList.add('visible');
-                toggle.textContent = 'Hide Research';
-                toggle.classList.add('active');
-                loadSummaryContent(); // Load content when showing
-            } else {
-                panel.classList.remove('visible');
-                toggle.textContent = 'Show Research';
-                toggle.classList.remove('active');
-            }
-        }
-
-        function toggleSummaryPosition() {
-            const container = document.getElementById('mainContainer');
-            const toggle = document.getElementById('positionToggle');
-            
-            if (summaryPosition === 'right') {
-                summaryPosition = 'left';
-                container.className = 'main-container summary-left';
-                toggle.textContent = 'Move Right';
-            } else {
-                summaryPosition = 'right';
-                container.className = 'main-container summary-right';
-                toggle.textContent = 'Move Left';
-            }
-        }
-
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set up periodic summary refresh
-            setInterval(async () => {
-                if (summaryVisible) {
-                    await loadSummaryContent();
-                }
-            }, 60000); // Refresh every minute
-            
-            // Load initial summary if needed
-            if (summaryVisible) {
-                loadSummaryContent();
-            }
-        });
-
-        // Allow Enter key to send message
-        document.getElementById('messageInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-    </script>
+await ensureDebate();
+render();
+reanalyze();
+</script>
 </body>
 </html>

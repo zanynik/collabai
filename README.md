@@ -1,104 +1,104 @@
-# My AI Site
+# Agora
 
-A minimal 2-page AI chat site with automated GitHub integration for community summaries.
+**Debates that converge.** Participants argue in plain language. Claude
+formalizes each argument onto the debate's shared claims, a logic engine
+(certified by Lean 4) checks whether it actually follows, and an AI facilitator
+steers the next round toward the cruxes: the few claims the whole disagreement
+hinges on.
 
-## Setup Instructions
+See [docs/VISION.md](docs/VISION.md) for the product thinking.
 
-### 1. Install Dependencies
+## What you get
+
+- **Follows / Gap / Self-contradictory** verdict on every argument, with a
+  concrete counterexample when it doesn't follow
+- **Contradiction detection** per side, reduced to the smallest conflicting set
+- **Load-bearing premises** highlighted: the only things worth attacking
+- **Cruxes** ranked by how much both sides depend on them and how split people are
+- **Next questions** from the Facilitator, based on the checked analysis
+- **Lean 4 certificate** for every verdict, re-checkable by anyone
+
+## Run locally
 
 ```bash
 npm install
 ```
 
-### 2. Environment Configuration
-
-#### For Local Development:
-Set environment variables:
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+```
 
 ```bash
-export GITHUB_TOKEN="your_github_token_here"
-export REPO_OWNER="your-github-username" 
-export REPO_NAME="your-repository-name"
-export OPENAI_API_KEY="your_openai_api_key_here"
+npm run dev
 ```
 
-#### For Vercel Deployment:
-Set these environment variables in your Vercel dashboard:
-
-- `GITHUB_TOKEN`: Your GitHub personal access token
-- `REPO_OWNER`: Your GitHub username (e.g., "zanynik")
-- `REPO_NAME`: Your repository name (e.g., "collabai")  
-- `OPENAI_API_KEY`: Your OpenAI API key
-
-**To get a GitHub token:**
-1. Go to GitHub Settings > Developer settings > Personal access tokens
-2. Generate a new token with `repo` permissions
-3. Copy and use the token in the environment variable above
-
-**To get an OpenAI API key:**
-1. Go to https://platform.openai.com/api-keys
-2. Create a new secret key
-3. Copy and use the key in the environment variable above
-
-### 3. Usage
-
-#### Manual Summary Update
-Call the update script with a new summary:
+Open http://localhost:3000. The example debate loads automatically. Without an
+API key, everything except *Formalize with AI* and *Suggest next questions*
+still works; use **Write it formally** to add arguments by hand.
 
 ```bash
-node updateSummary.js "Your new summary content here"
+npm test
 ```
 
-#### Using npm script
+## Deploy (Vercel)
+
+Static files are in `public/`, serverless functions in `api/`. Set:
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | for AI features | Formalizer and Facilitator |
+| `AGORA_MODEL` | no | Override the model (default `claude-opus-5-5`) |
+| `LEAN_SERVER_URL` | no | URL of the Lean checker (below) for kernel-certified verdicts |
+| `LEAN_SERVER_TOKEN` | no | Shared secret for the Lean checker |
+
+## Lean checker (optional)
+
+Without it, verdicts come from exhaustive truth tables (exact for
+propositional logic) and the Lean source is still generated for export. With
+it, the Lean 4 kernel checks every theorem on each analysis.
+
 ```bash
-npm run update
+docker build -t agora-lean lean-server
 ```
-
-#### Mock Update (for testing)
-Run without arguments to test with mock data:
 
 ```bash
-node updateSummary.js
+docker run -p 8080:8080 -e LEAN_SERVER_TOKEN=change-me agora-lean
 ```
 
-## File Structure
+Then set `LEAN_SERVER_URL=http://<host>:8080` and the same `LEAN_SERVER_TOKEN`
+on the web app.
+
+## API
+
+All endpoints take `POST` with `{ debate }` (see the shape in
+`lib/debate.js`, or `public/example-debate.json`).
+
+| Endpoint | AI? | Returns |
+|---|---|---|
+| `/api/analyze` | no | verdicts, counterexamples, contradictions, cruxes, Lean source, verification status |
+| `/api/formalize` | yes | proposed `premises ⊢ conclusion` + any new shared claims, for `{ text, side, author }` |
+| `/api/facilitate` | yes | a neutral synthesis and up to 5 high-leverage questions |
+
+## Formula syntax
+
+`M` is the motion; `P1, P2, …` are shared claims. Connectives: `!` not, `&`
+and, `|` or, `->` implies, `<->` iff (unicode `¬ ∧ ∨ → ↔` also work).
+
+## Layout
 
 ```
-my-ai-site/
-├── api/
-│   └── update-summary.js  # Vercel serverless function for GitHub updates
-├── public/
-│   ├── index.html      # Chat interface with real OpenAI integration
-│   └── info.md         # Community summary page (auto-updated)
-├── updateSummary.js    # GitHub integration script (for local use)
-├── package.json        # Dependencies: @octokit/rest, openai
-├── vercel.json         # Vercel deployment configuration
-└── README.md          # This file
+api/            serverless handlers (analyze, formalize, facilitate)
+lib/logic.js    parser, entailment, unsat cores, Lean 4 emitter
+lib/debate.js   debate analysis: verdicts, contradictions, cruxes
+lib/agents.js   Formalizer and Facilitator prompts + schemas
+lib/llm.js      Claude client (structured output)
+lib/lean.js     client for the Lean checker service
+lean-server/    Lean 4 checker service + Dockerfile
+public/         single-page app + example debate
+test/           node:test suite
 ```
 
-## How It Works
+## Status
 
-1. **Real AI Chat**: `public/index.html` uses OpenAI API for real chat conversations
-2. **Smart Summarization**: Chat conversations are summarized using OpenAI and combined with existing summaries
-3. **GitHub Integration**: `api/update-summary.js` serverless function updates `public/info.md` on GitHub
-4. **Auto-Deploy**: Changes pushed to GitHub trigger automatic Vercel redeployment
-
-## Features
-
-- ✅ Real OpenAI chat integration
-- ✅ Intelligent chat summarization
-- ✅ Incremental summary updates (doesn't overwrite, but combines intelligently)
-- ✅ Automatic GitHub commits and deployment
-- ✅ Serverless architecture (no database needed)
-- ✅ CORS-enabled API endpoints
-
-## Next Steps
-
-- Set up environment variables in Vercel dashboard
-- Test the full flow: chat → summarize → GitHub update → redeploy
-- Consider adding authentication for production use
-
-## Requirements
-
-- Node.js 14.0.0 or higher
-- GitHub personal access token with repo permissions
+Prototype. Debates live in the browser (localStorage) and can be exported or
+imported as JSON. Multiplayer storage is the next step (see the roadmap in the vision doc).

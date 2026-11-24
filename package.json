@@ -1,25 +1,19 @@
 {
-  "name": "my-ai-site",
-  "version": "1.0.0",
-  "description": "A minimal 2-page AI chat site with GitHub integration",
-  "main": "updateSummary.js",
+  "name": "collabai",
+  "version": "2.0.0",
+  "description": "Agora — debates where AI maps the arguments and Lean 4 checks the logic, so discussions converge on what actually matters.",
+  "type": "module",
+  "private": true,
   "scripts": {
-    "update": "node updateSummary.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node dev-server.js",
+    "test": "node --test test/*.test.js"
   },
-  "keywords": [
-    "ai",
-    "chat",
-    "github",
-    "automation"
-  ],
-  "author": "",
   "license": "MIT",
   "dependencies": {
-    "@octokit/rest": "^20.0.2",
-    "openai": "^4.0.0"
+    "@anthropic-ai/sdk": "^1.13.0",
+    "zod": "^4.0.0"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=20"
   }
 }
